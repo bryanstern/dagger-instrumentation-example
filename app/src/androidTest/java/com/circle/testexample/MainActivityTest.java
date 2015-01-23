@@ -16,7 +16,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.mockito.Mockito.when;
 
-public class MainActivityTest extends InjectedBaseActivityTest<MainActivity> {
+public class MainActivityTest extends InjectedBaseActivityTest {
     public MainActivityTest() {
         super(MainActivity.class);
     }

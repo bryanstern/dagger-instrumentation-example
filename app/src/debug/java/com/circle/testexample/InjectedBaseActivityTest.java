@@ -7,11 +7,11 @@ import com.circle.testexample.ui.BaseActivity;
 
 import javax.inject.Inject;
 
-public class InjectedBaseActivityTest<T extends BaseActivity> extends ActivityInstrumentationTestCase2<T> {
+public class InjectedBaseActivityTest extends ActivityInstrumentationTestCase2 {
     @Inject
     Api mockApi;
 
-    public InjectedBaseActivityTest(Class<T> activityClass) {
+    public InjectedBaseActivityTest(Class activityClass) {
         super(activityClass);
     }
 
