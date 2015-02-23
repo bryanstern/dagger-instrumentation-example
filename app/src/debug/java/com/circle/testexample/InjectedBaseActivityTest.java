@@ -7,7 +7,7 @@ import com.circle.testexample.ui.BaseActivity;
 
 import javax.inject.Inject;
 
-public class InjectedBaseActivityTest extends ActivityInstrumentationTestCase2 {
+public class InjectedBaseActivityTest extends ActivityInstrumentationTestCase2<BaseActivity> {
     @Inject
     Api mockApi;
 
