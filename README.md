@@ -54,12 +54,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '21.1.1'
+    compileSdkVersion 22
+    buildToolsVersion '21.1.2'
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 21
+        minSdkVersion 16
+        targetSdkVersion 22
         versionCode 1
         versionName '1.0.0'
         applicationId 'com.circle.sample'
@@ -237,30 +237,36 @@ public abstract class BaseActivity extends Activity {
 ```
 
 #### Writing Activity Tests
-The final piece of the puzzle, injecting mocks into our `ActivityInstrumentationTestCase2`. All we have to do is get an instance of our `App`, tell it recreate our dependency graph in mock mode, and then inject the mocks into our test case so that we can manipulate them.
+The final piece of the puzzle is to define the behavior of our mocks in our tests. Below is a rule you can use in your JUnit tests to fetch the dependency graph from your `Application` and make all the dependencies available to your testing code.
 
 ```java
-public class InjectedBaseActivityTest<T extends BaseActivity> extends ActivityInstrumentationTestCase2<T> {
+public class InjectRule implements TestRule {
+
+    DependencyWrapper dependencyWrapper = new DependencyWrapper();
+
+    public InjectRule() {
+    }
+
+    @Override
+    public Statement apply(final Statement base, Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                App app = (App) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
+                app.setMockMode(true);
+                app.graph().inject(dependencyWrapper);
+
+                base.evaluate();
+            }
+        };
+    }
+}
+```
+
+```java
+public class DependencyWrapper {
     @Inject
-    Api mockApi;
-
-    public InjectedBaseActivityTest(Class<T> activityClass) {
-        super(activityClass);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        App app = (App) getInstrumentation().getTargetContext().getApplicationContext();
-        app.setMockMode(true);
-        app.graph().inject(this);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        App.getInstance().setMockMode(false);
-    }
+    public Api api;
 }
 ```
 
@@ -269,22 +275,21 @@ We recommend [Espresso](https://code.google.com/p/android-test-kit/) for writing
 So when we test an activity, we just define the mocking behavior that we want from the dependency we share with our Activity under test. Then confirm that the activity behaved this way. In this example, we have an [Activity](https://github.com/bryanstern/dagger-instrumentation-example/blob/master/app/src/main/java/com/circle/testexample/ui/MainActivity.java) that has two text fields that performs a log in request. We want to test that it starts the right activity with a successful response or shows an error message if it fails.
 
 ```java
-public class MainActivityTest extends InjectedBaseActivityTest<MainActivity> {
-    public MainActivityTest() {
-        super(MainActivity.class);
-    }
+@RunWith(AndroidJUnit4.class)
+public class MainActivityTest {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    // see https://gist.github.com/JakeWharton/1c2f2cadab2ddd97f9fb
+    public final ActivityRule<MainActivity> main = new ActivityRule<>(MainActivity.class);
+    public final InjectRule injectRule = new InjectRule();
 
-        getActivity();
-    }
+    @Rule
+    public final TestRule rule = RuleChain.outerRule(injectRule).around(main);
 
+    @Test
     public void testLoginSuccess() {
-        when(mockApi.login("real@user.com", "secret")).thenReturn(Observable.just(true));
+        when(injectRule.dependencyWrapper.api.login("real@user.com", "secret")).thenReturn(Observable.just(true));
 
-        ActivityMonitor monitor = getInstrumentation().addMonitor(AccountActivity.class.getName(), null, true);
+        ActivityMonitor monitor = main.instrumentation().addMonitor(AccountActivity.class.getName(), null, true);
 
         onView(withId(R.id.username)).perform(typeText("real@user.com"));
         onView(withId(R.id.password)).perform(typeText("secret"));
@@ -292,20 +297,21 @@ public class MainActivityTest extends InjectedBaseActivityTest<MainActivity> {
 
         assertEquals(1, monitor.getHits());
 
-        getInstrumentation().removeMonitor(monitor);
+        main.instrumentation().removeMonitor(monitor);
     }
 
+    @Test
     public void testLoginFailure() {
-        when(mockApi.login("real@user.com", "secret")).thenReturn(Observable.just(false));
+        when(injectRule.dependencyWrapper.api.login("real@user.com", "secret")).thenReturn(Observable.just(false));
 
         onView(withId(R.id.username)).perform(typeText("real@user.com"));
         onView(withId(R.id.password)).perform(typeText("secret"));
         onView(withId(R.id.button)).perform(click());
 
-        onView(withText(getActivity().getString(R.string.error_invalid_credentials)))
-                .check(matches(isDisplayed()));
+        onView(withText(main.get().getString(R.string.error_invalid_credentials))).check(matches(isDisplayed()));
     }
 }
+
 ```
 
 ## Summary

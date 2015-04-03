@@ -1,4 +1,4 @@
-package com.circle.testexample.data;
+package com.circle.testexample;
 
 import rx.Observable;
 

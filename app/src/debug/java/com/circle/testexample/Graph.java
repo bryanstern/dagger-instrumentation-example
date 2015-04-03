@@ -1,6 +1,7 @@
 package com.circle.testexample;
 
-import com.circle.testexample.data.DebugDataModule;
+import com.circle.testexample.dagger.DebugDataModule;
+import com.circle.testexample.dagger.DependencyWrapper;
 import com.circle.testexample.ui.BaseActivity;
 
 import javax.inject.Singleton;
@@ -12,7 +13,7 @@ import dagger.Component;
 public interface Graph {
 
     void inject(BaseActivity activity);
-    void inject(InjectedBaseActivityTest test);
+    void inject(DependencyWrapper wrapper);
 
     public final static class Initializer {
         public static Graph init(boolean mockMode) {

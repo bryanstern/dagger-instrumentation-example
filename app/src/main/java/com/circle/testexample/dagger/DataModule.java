@@ -1,4 +1,6 @@
-package com.circle.testexample.data;
+package com.circle.testexample.dagger;
+
+import com.circle.testexample.Api;
 
 import javax.inject.Singleton;
 

@@ -3,7 +3,7 @@ package com.circle.testexample.ui;
 import android.app.Activity;
 import android.os.Bundle;
 
-import com.circle.testexample.data.Api;
+import com.circle.testexample.Api;
 import com.circle.testexample.App;
 
 import javax.inject.Inject;
