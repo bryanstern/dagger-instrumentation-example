@@ -50,8 +50,8 @@ dependencies {
     compile 'io.reactivex:rxandroid:0.23.0'
 
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.google.dagger:dagger:2.0-SNAPSHOT'
-    apt 'com.google.dagger:dagger-compiler:2.0-SNAPSHOT'
+    compile 'com.google.dagger:dagger:2.1-SNAPSHOT'
+    apt 'com.google.dagger:dagger-compiler:2.1-SNAPSHOT'
     provided 'org.glassfish:javax.annotation:10.0-b28'
 
     // adds the @Generated annoation that Android lacks
