@@ -16,7 +16,7 @@ public interface Graph {
 
     public final static class Initializer {
         public static Graph init(boolean mockMode) {
-            return Dagger_Graph.builder()
+            return DaggerGraph.builder()
                     .debugDataModule(new DebugDataModule(mockMode))
                     .build();
         }

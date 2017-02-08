@@ -12,7 +12,7 @@ public class App extends Application {
         super.onCreate();
 
         sInstance = this;
-        graph = Graph.Initializer.init(false);
+        graph = Graph.Initializer.init();
     }
 
     public static App getInstance() {
@@ -21,10 +21,6 @@ public class App extends Application {
 
     public Graph graph() {
         return graph;
-    }
-
-    public void setMockMode(boolean useMock) {
-        graph = Graph.Initializer.init(useMock);
     }
 
 }

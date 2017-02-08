@@ -1,13 +1,3 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        // This plugin helps Android Studio find Dagger's generated classes
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-    }
-}
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
@@ -23,6 +13,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -38,11 +29,18 @@ android {
     packagingOptions {
         exclude 'LICENSE.txt'
     }
-}
 
-repositories {
-    // Currently Dagger 2 is published to Sonatype's maven repo
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    productFlavors {
+        mock {
+            applicationIdSuffix = ".mock"
+        }
+
+        prod{
+            
+        }
+    }
+
+    excludeMockReleaseBuild()
 }
 
 dependencies {
@@ -50,9 +48,10 @@ dependencies {
     compile 'io.reactivex:rxandroid:0.23.0'
 
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.google.dagger:dagger:2.0-SNAPSHOT'
-    apt 'com.google.dagger:dagger-compiler:2.0-SNAPSHOT'
-    provided 'org.glassfish:javax.annotation:10.0-b28'
+
+    apt 'com.google.dagger:dagger-compiler:2.7'
+    compile 'com.google.dagger:dagger:2.7'
+    provided 'javax.annotation:jsr250-api:1.0'
 
     // adds the @Generated annoation that Android lacks
     debugCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
@@ -61,4 +60,14 @@ dependencies {
 
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
     androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
+}
+
+def excludeMockReleaseBuild(){
+    // Remove mockRelease as it's not needed.
+    android.variantFilter { variant ->
+        if (variant.buildType.name.equals('release')
+                && variant.getFlavors().get(0).name.equals('mock')) {
+            variant.setIgnore(true);
+        }
+    }
 }
